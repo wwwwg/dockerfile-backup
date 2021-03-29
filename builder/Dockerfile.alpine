@@ -1,0 +1,22 @@
+ARG OS_VER=edge
+
+FROM yocents/library:tzdata AS lib
+FROM alpine:${OS_VER}
+
+COPY --from=lib /zoneinfo/ /usr/share/zoneinfo/
+
+RUN set -ex &&\
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
+
+RUN set -ex && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories && \
+    apk add --no-cache build-base \
+        bsd-compat-headers \
+        coreutils \
+        git \
+        linux-headers \
+        openssl-dev \
+        zlib-dev
+
+WORKDIR /usr/src
