@@ -1,0 +1,30 @@
+ARG BASE_VER=2.26.2
+
+FROM yocents/git:${BASE_VER}
+
+RUN set -ex && \
+    apk add --no-cache git-gitweb perl-cgi && \
+    echo 'our $projectroot = "/data";' > /etc/gitweb.conf && \
+    echo 'our $site_name = "gitweb";' >> /etc/gitweb.conf && \
+    echo 'our $projects_list_description_width = 80;' >> /etc/gitweb.conf && \
+    echo '$feature{"pathinfo"}{"default"} = [1];' >> /etc/gitweb.conf
+
+RUN set -ex && \
+    apk add --no-cache --no-scripts lighttpd && \
+    mkdir -p /var/log/lighttpd && \
+    sed -i 's|server.document-root.*|server.document-root = "/usr/share/gitweb"|' /etc/lighttpd/lighttpd.conf && \
+    sed -i '/^server.errorlog/,+3d' /etc/lighttpd/lighttpd.conf && \
+    sed -i '/^server.indexfiles/,+2d' /etc/lighttpd/lighttpd.conf && \
+    sed -i '/^accesslog.filename/d' /etc/lighttpd/lighttpd.conf && \
+    echo 'include "gitweb.conf"' >> /etc/lighttpd/lighttpd.conf
+
+VOLUME ["/data"]
+
+EXPOSE 80
+
+COPY gitweb.conf       /etc/lighttpd/
+COPY entrypoint.web.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/usr/sbin/lighttpd", "-D", "-f", "/etc/lighttpd/lighttpd.conf"]
