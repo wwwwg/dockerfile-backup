@@ -1,0 +1,18 @@
+ARG BASE_VER=2.26.2
+
+FROM yocents/git:${BASE_VER}
+
+RUN set -ex && \
+    apk add --no-cache git-daemon
+
+VOLUME ["/data"]
+
+EXPOSE 9418
+
+COPY entrypoint.daemon.sh /entrypoint.sh
+
+ENV HOME=/data
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/usr/bin/git", "daemon", "--export-all", "--reuseaddr", "--base-path=/data", "/data"]
