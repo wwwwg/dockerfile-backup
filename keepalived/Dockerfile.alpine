@@ -1,0 +1,16 @@
+ARG OS_VER=edge
+
+FROM alpine:${OS_VER}
+
+RUN set -ex && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/' /etc/apk/repositories && \
+    apk add --no-cache keepalived
+
+RUN set -ex && \
+    apk add --no-cache curl netcat-openbsd
+
+COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/usr/sbin/keepalived", "-n", "-l"]
