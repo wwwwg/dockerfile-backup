@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv sh
+
+set -u
+
+# Handle the VNC password.
+if [ -f /root/.vncpass ] && [ -n "$(cat /root/.vncpass)" ]; then
+    VNC_SECURITY="-rfbauth /root/.vncpass"
+else
+    VNC_SECURITY="-nopw"
+fi
+
+exec /usr/bin/x11vnc -display ${DISPLAY} -rfbport ${VNC_PORT} ${VNC_SECURITY} -no6 -shared -forever -noxdamage -cursor arrow 2>/dev/null 1>&2

@@ -1,0 +1,5 @@
+#!/usr/bin/with-contenv sh
+
+export HOME=/home/inside
+
+exec /bin/s6-notifyoncheck -d s6-setuidgid inside /usr/bin/openbox-session 2>/dev/null

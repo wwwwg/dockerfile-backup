@@ -1,0 +1,8 @@
+#!/usr/bin/with-contenv sh
+
+set -u
+
+# Make sure to remove the X server's lock file.
+rm -f /tmp/.X$(echo ${DISPLAY} | cut -d':' -f2)-lock
+
+exec 2>&1 /bin/s6-notifyoncheck -d /usr/bin/Xvfb ${DISPLAY} -ac -screen 0 ${RESOLUTION}x24

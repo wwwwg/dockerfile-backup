@@ -1,0 +1,27 @@
+ARG OS_VER=edge
+
+FROM alpine:${OS_VER}
+
+ARG PGID=1000
+ARG PUID=1000
+ARG S6_VER=latest
+
+RUN set -ex && \
+    addgroup -g ${PGID} inside 2>/dev/null && \
+    adduser -D -H -h /home/inside -s /bin/ash -G inside -u ${PUID} inside 2>/dev/null && \
+    wget -qO - http://static.inside.net/docker/s6-overlay/${S6_VER}/s6-overlay-amd64.tar.gz | tar -xz -C /
+    
+RUN set -ex && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/' /etc/apk/repositories && \
+    apk add --no-cache xvfb xdpyinfo x11vnc
+
+RUN set -ex && \
+    apk add --no-cache openbox font-croscore
+
+COPY --chown=root:root rootfs/ /
+
+EXPOSE 5900
+
+ENV DISPLAY=:0 RESOLUTION=1920x1080 VNC_PORT=5900
+
+ENTRYPOINT ["/init"]
