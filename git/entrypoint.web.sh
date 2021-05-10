@@ -6,7 +6,7 @@ readonly data_dir="/data"
 getent group lighttpd >/dev/null || \
     addgroup -g ${PGID:-1000} lighttpd 2>/dev/null
 getent passwd lighttpd >/dev/null || \
-    adduser -D -H -h ${data_dir} -s /sbin/nologin -G lighttpd -u ${PUID:-1000} lighttpd 2>/dev/null
+    adduser -D -H -h ${data_dir} -s /sbin/nologin -G lighttpd -g gitweb -u ${PUID:-1000} lighttpd 2>/dev/null
 
 set -eu
 
