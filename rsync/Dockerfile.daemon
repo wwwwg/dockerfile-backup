@@ -1,0 +1,13 @@
+ARG BASE_VER=3.1.3
+
+FROM yocents/rsync:${BASE_VER}
+
+VOLUME ["/conf"]
+
+COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 873
+
+CMD ["/usr/bin/rsync", "--daemon", "--no-detach", "--config=/conf/rsyncd.conf"]
