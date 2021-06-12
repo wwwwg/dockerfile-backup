@@ -3,12 +3,13 @@ ARG BASE_VER=3.1.3
 FROM yocents/rsync:${BASE_VER}
 
 RUN set -ex && \
-    apk add --no-cache openssh-server
+    apk add --no-cache openssh-server && \
+    ln -sf /root/ssh_host_dsa_key /etc/ssh/ssh_host_dsa_key && \
+    ln -sf /root/ssh_host_ecdsa_key /etc/ssh/ssh_host_ecdsa_key && \
+    ln -sf /root/ssh_host_ed25519_key /etc/ssh/ssh_host_ed25519_key && \
+    ln -sf /root/ssh_host_rsa_key /etc/ssh/ssh_host_rsa_key && \
+    passwd -u root
 
 EXPOSE 22
 
-COPY entrypoint.ssh.sh /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-CMD ["/usr/sbin/sshd", "-D", "-e"]
+CMD ["/usr/sbin/sshd", "-D", "-e", "-q"]
