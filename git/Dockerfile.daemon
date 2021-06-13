@@ -1,4 +1,4 @@
-ARG BASE_VER=2.26.2
+ARG BASE_VER=2.26.3
 
 FROM yocents/git:${BASE_VER}
 
@@ -7,12 +7,12 @@ RUN set -ex && \
 
 VOLUME ["/data"]
 
-EXPOSE 9418
-
 COPY entrypoint.daemon.sh /entrypoint.sh
 
 ENV HOME=/data
 
 ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 9418
 
 CMD ["/usr/bin/git", "daemon", "--export-all", "--reuseaddr", "--base-path=/data", "/data"]
