@@ -1,6 +1,9 @@
 ARG BASE_VER=2.26.3
 
+FROM yocents/library:su-exec-alpine AS lib
 FROM yocents/git:${BASE_VER}
+
+COPY --from=lib /sbin/su-exec /sbin/
 
 RUN set -ex && \
     apk add --no-cache git-daemon
