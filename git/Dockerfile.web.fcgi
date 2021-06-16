@@ -6,7 +6,7 @@ RUN set -ex && \
     apk add --no-cache --no-scripts spawn-fcgi fcgiwrap
 
 RUN set -ex && \
-    apk add --no-cache git-gitweb perl-cgi perl-fcgi
+    apk add --no-cache git-gitweb perl-cgi-fast
 
 VOLUME ["/data"]
 
