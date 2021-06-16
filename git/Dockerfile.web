@@ -20,7 +20,7 @@ RUN set -ex && \
 
 VOLUME ["/data"]
 
-COPY gitweb.conf       /etc/lighttpd/
+COPY lighttpd.conf     /etc/lighttpd/getweb.conf
 COPY entrypoint.web.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
