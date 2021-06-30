@@ -1,0 +1,16 @@
+ARG BASE_VER=1.17.10
+
+FROM yocents/nginx:base-${BASE_VER}-alpine
+
+RUN set -eux && \
+    apk add --no-cache curl && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
+
+VOLUME ["/conf", "/htdocs"]
+
+COPY entrypoint.sh /
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["/usr/sbin/nginx", "-c", "/conf/nginx.conf", "-g", "daemon off;"]
