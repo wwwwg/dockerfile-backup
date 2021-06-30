@@ -1,0 +1,109 @@
+ARG OS_VER=edge
+
+FROM alpine:${OS_VER} AS build
+
+ARG NGINX_VER=1.17.10
+
+WORKDIR /usr/src
+
+RUN set -eux && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/' /etc/apk/repositories && \
+    apk add --no-cache --virtual .build-deps \
+        build-base \
+        gd-dev \
+        geoip-dev \
+        git \
+        libxml2-dev \
+        libxslt-dev \
+        linux-headers \
+        openssl-dev \
+        pcre-dev \
+        zlib-dev && \
+    git clone git://repos.bendi.net/github/google/ngx_brotli.git && \
+    wget -qO - "http://source.inside.net/google/brotli/latest.tar.gz" | tar -xzC ngx_brotli/deps/brotli --strip=1 && \
+    mkdir -p echo-nginx-module && \
+    wget -qO - "http://source.inside.net/nginx_module/echo-nginx-module/latest.tar.gz" | tar -xzC echo-nginx-module --strip=1 && \
+    mkdir -p ngx-fancyindex && \
+    wget -qO - "http://source.inside.net/nginx_module/ngx-fancyindex/latest.tar.xz" | tar -xJC ngx-fancyindex --strip=1 && \
+    mkdir -p nginx-dav-ext-module && \
+    wget -qO - "http://source.inside.net/nginx_module/nginx-dav-ext-module/latest.tar.gz" | tar -xzC nginx-dav-ext-module --strip=1 && \
+    wget -qO - "http://source.inside.net/nginx/nginx-${NGINX_VER}.tar.gz" | tar -xzC . --strip=1 && \
+    ./configure --prefix=/etc/nginx \
+        --sbin-path=/usr/sbin/nginx \
+        --modules-path=/usr/lib/nginx/modules \
+        --conf-path=/etc/nginx/nginx.conf \
+        --pid-path=/var/run/nginx.pid \
+        --lock-path=/var/lock/nginx.lock \
+        --error-log-path=/var/log/nginx/error.log \
+        --http-log-path=/var/log/nginx/access.log \
+        --http-client-body-temp-path=/var/cache/nginx/client_temp \
+        --http-proxy-temp-path=/var/cache/nginx/proxy_temp \
+        --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp \
+        --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp \
+        --http-scgi-temp-path=/var/cache/nginx/scgi_temp \
+        --user=www-data \
+        --group=www-data \
+        --with-threads \
+        --with-file-aio \
+        --with-compat \
+        --with-http_ssl_module \
+        --with-http_v2_module \
+        --with-http_realip_module \
+        --with-http_addition_module \
+        --with-http_xslt_module=dynamic \
+        --with-http_image_filter_module=dynamic \
+        --with-http_geoip_module=dynamic \
+        --with-http_sub_module \
+        --with-http_dav_module \
+        --with-http_flv_module \
+        --with-http_mp4_module \
+        --with-http_gunzip_module \
+        --with-http_gzip_static_module \
+        --with-http_auth_request_module \
+        --with-http_random_index_module \
+        --with-http_secure_link_module \
+        --with-http_degradation_module \
+        --with-http_slice_module \
+        --with-http_stub_status_module \
+        --with-mail=dynamic \
+        --with-mail_ssl_module \
+        --with-stream=dynamic \
+        --with-stream_ssl_module \
+        --with-stream_realip_module \
+        --with-stream_geoip_module=dynamic \
+        --with-stream_ssl_preread_module \
+        --add-dynamic-module=./echo-nginx-module \
+        --add-dynamic-module=./nginx-dav-ext-module \
+        --add-dynamic-module=./ngx_brotli \
+        --add-dynamic-module=./ngx-fancyindex && \
+    make -s && \
+    make -s install && \
+    rm -f /etc/nginx/*.default && \
+    apk del .build-deps
+
+FROM yocents/library:tzdata AS lib
+FROM alpine:${OS_VER}
+
+COPY --from=build /etc/nginx/             /etc/nginx/
+COPY --from=build /usr/lib/nginx/modules/ /usr/lib/nginx/modules/
+COPY --from=build /usr/sbin/nginx         /usr/sbin/
+COPY --from=lib   /zoneinfo/Asia/Shanghai /etc/localtime
+
+RUN set -ex && \
+    grep ":33:" /etc/group /etc/passwd && \
+    sed -i 's|.*:33:.*|www-data:x:33:|g' /etc/group && \
+    sed -i 's|.*:33:.*|www-data:x:33:33:www-data:/var/www:/sbin/nologin|g' /etc/passwd && \
+    grep ":33:" /etc/group /etc/passwd && \
+    echo "www-data:!::0:::::" >> /etc/shadow
+
+RUN set -ex && \
+    echo "Asia/Shanghai" > /etc/timezone && \
+    sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/' /etc/apk/repositories && \
+    apk add --no-cache ca-certificates gd geoip libgcc libssl1.1 libxml2 libxslt pcre zlib && \
+    mkdir -p /var/cache/nginx /var/log/nginx
+
+EXPOSE 80 443
+
+STOPSIGNAL SIGQUIT
+
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
