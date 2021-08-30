@@ -19,15 +19,15 @@ RUN set -eux && \
         openssl-dev \
         pcre-dev \
         zlib-dev && \
-    git clone git://repos.bendi.net/github/google/ngx_brotli.git && \
-    wget -qO - "http://source.inside.net/google/brotli/latest.tar.gz" | tar -xzC ngx_brotli/deps/brotli --strip=1 && \
+    git clone git://repos.bendi.net/google/ngx_brotli.git && \
+    wget -qO- "http://source.inside.net/google/brotli/latest.tar.gz" | tar -xzC ngx_brotli/deps/brotli --strip=1 && \
     mkdir -p echo-nginx-module && \
-    wget -qO - "http://source.inside.net/nginx_module/echo-nginx-module/latest.tar.gz" | tar -xzC echo-nginx-module --strip=1 && \
+    wget -qO- "http://source.inside.net/nginx_module/echo-nginx-module/latest.tar.gz" | tar -xzC echo-nginx-module --strip=1 && \
     mkdir -p ngx-fancyindex && \
-    wget -qO - "http://source.inside.net/nginx_module/ngx-fancyindex/latest.tar.xz" | tar -xJC ngx-fancyindex --strip=1 && \
+    wget -qO- "http://source.inside.net/nginx_module/ngx-fancyindex/latest.tar.xz" | tar -xJC ngx-fancyindex --strip=1 && \
     mkdir -p nginx-dav-ext-module && \
-    wget -qO - "http://source.inside.net/nginx_module/nginx-dav-ext-module/latest.tar.gz" | tar -xzC nginx-dav-ext-module --strip=1 && \
-    wget -qO - "http://source.inside.net/nginx/nginx-${NGINX_VER}.tar.gz" | tar -xzC . --strip=1 && \
+    wget -qO- "http://source.inside.net/nginx_module/nginx-dav-ext-module/latest.tar.gz" | tar -xzC nginx-dav-ext-module --strip=1 && \
+    wget -qO- "http://source.inside.net/nginx/nginx-${NGINX_VER}.tar.gz" | tar -xzC . --strip=1 && \
     ./configure --prefix=/etc/nginx \
         --sbin-path=/usr/sbin/nginx \
         --modules-path=/usr/lib/nginx/modules \
